@@ -31,15 +31,22 @@ C_DEPS := $(addprefix $(BUILD_DIR)/, $(C_SRCS:.c=.d))
 $(TARGET): $(C_OBJS) $(LDSCRIPT) | $(BUILD_DIR)
 	$(LD) $(C_OBJS) $(LDFLAGS) -o $@
 
-$(BUILD_DIR) $(BUILD_DIR)/src:
+$(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/src/shared:
 ifeq ($(OS),Windows_NT)
-	mkdir $(subst /,\,$@)
+	mkdir $(subst /,\,$(BUILD_DIR))\\src\\shared
 else
-	mkdir -p $@
+	mkdir -p -- $(BUILD_DIR)/src/shared
 endif
 
+SHARED_LIB_NAME    := MyLib
+SHARED_LIB_VERSION := 1.0.0
+
+# TODO: Add support for cross-compiling and static linking for shared libraries
 $(C_OBJS): $(BUILD_DIR)/%.o : %.c | $(BUILD_DIR) $(BUILD_DIR)/src
 	$(CC) $(CFLAGS) $(CPPFLAGS) $< -MMD -MF $(@:.o=.d) -c -o $@
+	$(CC) -shared -fPIC -I./include \
+		-o $(BUILD_DIR)/src/shared/$(SHARED_LIB_NAME)-$(SHARED_LIB_VERSION).so \
+		./src/shared/$(SHARED_LIB_NAME)/lib.c
 
 clean:
 	rm -rf $(BUILD_DIR)
