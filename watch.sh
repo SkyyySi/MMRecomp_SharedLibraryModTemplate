@@ -80,7 +80,6 @@ while true; do
 			'io.github.zelda64recomp.zelda64recomp'
 	} &
 
-	printf '>>> Waiting for changes to source files...\n' 1>&2
 	while true; do
 		changed_file=$(inotifywait \
 			--quiet \
@@ -95,7 +94,8 @@ while true; do
 		exit_code=$?
 
 		if (( exit_code == 0 )); then
-			printf '>>> File change detected: %q\n\n' "$changed_file" 1>&2
+			clear
+			printf '>>> File change detected: %q\n' "$changed_file" 1>&2
 			stop_game
 			break
 		elif (( exit_code == 1 )); then
@@ -107,6 +107,4 @@ while true; do
 			continue
 		fi
 	done
-
-	clear
 done
